@@ -12,33 +12,52 @@
 
 #include "get_next_line.h"
 
-char *get_next_line(int fd)
+static char	*free_stash(char **stash)
 {
-    static char *carnet; // Une variable static est automatiquement initialisée à 0
-    char *buf;
-    int Ret;
-    Ret = 1;
-    if (fd < 0 || BUFFER_SIZE <= 0)
-        return (NULL);
-    buf = malloc(sizeof(char) * BUFFER_SIZE + 1);
-    if(!buf)
-        return (NULL);
-    while(ft_strchr_gnl(carnet) && Ret > 0)
-    {
-        Ret = read(fd, buf, BUFFER_SIZE);
-        if (Ret == -1)
-        {
-            free(carnet);
-            free(buf);
-            carnet = NULL;
-            return(NULL)
-        }
-        buf[Ret] = '\0';
-        carnet = ft_strjoin_gnl(carnet, buf);
-        if(!carnet)
-        {
-            free (buf);
-            return (NULL);
-        }
-    }
-}        
+	free(*stash);
+	*stash = NULL;
+	return (NULL);
+}
+
+static char	*read_stash(int fd, char *stash, char *buf)
+{
+	ssize_t	ret;
+
+	ret = 1;
+	while (!ft_strchr_gnl(stash) && ret > 0)
+	{
+		ret = read(fd, buf, BUFFER_SIZE);
+		if (ret < 0)
+		{
+			free(stash);
+			return (NULL);
+		}
+		buf[ret] = '\0';
+		stash = ft_strjoin_gnl(stash, buf);
+		if (!stash)
+			return (NULL);
+	}
+	return (stash);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*stash;
+	char		*buf;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf)
+		return (free_stash(&stash));
+	stash = read_stash(fd, stash, buf);
+	free(buf);
+	if (!stash || !stash[0])
+		return (free_stash(&stash));
+	line = ft_extract_line(stash);
+	if (!line)
+		return (free_stash(&stash));
+	stash = ft_keep_rest(stash);
+	return (line);
+}

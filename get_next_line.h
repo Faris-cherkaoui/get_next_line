@@ -10,15 +10,22 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE
-#define GET_NEXT_LINE
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
-#include <stdlib.h>
-#include <unistd.h>
+# include <stdlib.h>
+# include <unistd.h>
 
-size_t ft_strlen_gnl(char *str);
-size_t ft_strchr_gnl(char *str);
-char *ft_strjoin_gnl(char *dst, char *buf);
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
+
+size_t	ft_strlen_gnl(char *str);
+int		ft_strchr_gnl(char *str);
+char	*ft_strjoin_gnl(char *dst, char *buf);
+char	*ft_extract_line(char *stash);
+char	*ft_keep_rest(char *stash);
+
+char	*get_next_line(int fd);
 
 #endif
-
